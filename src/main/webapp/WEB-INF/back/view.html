@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>在线投票系统</title>
+<link type="image/x-icon" href="../images/yc.png" rel="shortcut icon"/>
+<link type="text/css" rel="stylesheet" href="../css/style.css" />
+</head>
+
+<body>
+<div id="header" class="wrap">
+	<img src="../images/logo.gif" />
+</div>
+<div id="navbar" class="wrap">
+	<div class="profile">
+		<span v-if="login">您好，{{userInfo.uname}}</span>
+		<span v-else><a href="../login.html">登录</a></span>
+		<span class="modify"><a href="manage.html" target="_blank">管理页面</a></span>
+		<span class="addnew"><a href="add.html" target="_blank">添加新投票</a></span>
+		
+	</div>
+	<div class="search">
+		<form method="post" action="Subject!search.action">
+			<input type="text" name="keywords" class="input-text" value=""/>
+			<input type="submit" name="submit" class="input-button" value="" />
+		</form>
+	</div>
+</div>
+
+<div id="vote" class="wrap">
+	<h2>查看投票</h2>
+	<ul class="list">
+		<li>
+			<h4>{{topic.tname}}</h4>
+			<p class="info">共有 {{count}} 个选项，已有 {{topic.count}} 个网友参与了投票。</p>
+			<ol>
+				<li v-for="item in topic.topicItems">
+					<div class="rate">
+						<div class="ratebg"><div class="percent" :style="'width:' + (item.nums / topic.count * 100).toFixed(2) + '%'"></div></div>
+						<p>{{item.nums}}票<span v-html="(item.nums / topic.count * 100).toFixed(2) + '%'"></span></p>
+					</div>
+				</li>
+			</ol>
+			<div class="goback"><a href="manage.html">返回投票列表</a></div>
+		</li>
+	</ul>
+</div>
+<div id="footer" class="wrap">
+	源辰信息 &copy; 版权所有
+</div>
+<script type="text/javascript" src="../js/jquery-1.12.4.js"></script>
+<script type="text/javascript" src="../js/vue.js"></script>
+<script type="text/javascript" src="../js/axios.js"></script>
+<script type="text/javascript" src="../js/qs.js"></script>
+<script type="text/javascript" src="../js/basic.js"></script>
+<script type="text/javascript">
+let app = new Vue({
+	el: "#vote",
+	data: {
+		topic: {},
+		tid: "",
+		count: 0
+	},
+	mounted: function() {
+		let tid = location.search.replace("?", "");
+		if (!tid) { // 如果tid没有给定
+			location.href = "manage.html";
+			return;
+		}
+		
+		this.tid = tid;
+		axios.post("../topic/findByTid", qs.stringify({tid: tid})).then( rt => {
+			if (rt.status == 200 && rt.data.code == 200) {
+				this.topic = rt.data.data;
+				this.count = this.topic.topicItems.length;
+				return;
+			}
+			location.href = "manage.html";
+		})
+	}
+})
+</script>
+</body>
+</html>

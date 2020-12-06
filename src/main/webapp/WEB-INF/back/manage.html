@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>在线投票系统</title>
+<link type="image/x-icon" href="../images/yc.png" rel="shortcut icon"/>
+<link type="text/css" rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+
+<div id="header" class="wrap">
+	<img src="../images/logo.gif" />
+</div>
+<div id="navbar" class="wrap">
+	<div class="profile">
+		<span v-if="login">您好，{{userInfo.uname}}</span>
+		<span v-else><a href="../login.html">登录</a></span>
+		<span class="modify"><a href="manage.html" target="_blank">管理页面</a></span>
+		<span class="addnew"><a href="add.html" target="_blank">添加新投票</a></span>
+		
+	</div>
+	<div class="search">
+		<form method="post" action="Subject!search.action">
+			<input type="text" name="keywords" class="input-text" value=""/>
+			<input type="submit" name="submit" class="input-button" value="" />
+		</form>
+	</div>
+</div>
+
+<div id="vote" class="wrap">
+	<h2>投票列表</h2>
+	<ul class="list">
+		<!-- 如果当前索引mod2是等于0的，则使用样式odd，否则不用 -->
+		<li :class="{odd: index % 2 == 0}" v-for="(item, index) in topics" >
+			<div v-if="item.status == 1">
+				<h4><a href="javascript:void(0)">{{item.tname}}</a></h4>
+				<div class="join"><a href="javascript:void(0)">暂未开始</a></div>
+			</div>
+			<div v-else-if="item.status == 2 || item.status == 3">
+				<h4><a :href="'view.html?' + item.tid">{{item.tname}}</a></h4>
+				<div class="join"><a :href="'view.html?' + item.tid">查看结果</a></div>
+			</div>
+			<div v-else>
+				<h4><a :href="'vote.html?' + item.tid">{{item.tname}}</a></h4>
+				<div class="join"><a :href="'vote.html?' + item.tid">参与投票</a></div>
+			</div>
+			<p class="info">共有 {{item.num}} 个选项，已有 {{item.count}} 个网友参与了投票。</p>
+		</li>
+	</ul>
+</div>
+<div id="footer" class="wrap">
+	源辰信息 &copy; 版权所有
+</div>
+<script type="text/javascript" src="../js/jquery-1.12.4.js"></script>
+<script type="text/javascript" src="../js/vue.js"></script>
+<script type="text/javascript" src="../js/axios.js"></script>
+<script type="text/javascript" src="../js/qs.js"></script>
+<script type="text/javascript" src="../js/basic.js"></script>
+<script type="text/javascript">
+let app = new Vue( {
+	el: "#vote",
+	data: {
+		topics: []
+	},
+	mounted: function() {
+		setTimeout(() => {
+			axios.get("../topic/findAll").then(rt => {
+				if (rt.status == 200 && rt.data.code == 200) {
+					rt.data.data.forEach(function(item, index) { // 每循环一次就是一个投票主题
+						if (item.usids) { // 说明已经有人投票
+							let temp = item.usids.split("&"); // 将已投票用户列表分割成数组
+							
+							// 当前用户在不在这个用户列表中，如果在说明已经投票
+							if ($.inArray(String(header.$data.userInfo.usid), temp) >= 0) { // 当前用户的id在这个已投票用户数组temp中吗？返回的是索引下标
+								item.status = 3; // 标记当前用户已经投票
+							}
+						}
+					});
+					this.topics = rt.data.data;
+				}
+			})
+		}, 1000);
+	}
+})
+</script>
+</body>
+</html>

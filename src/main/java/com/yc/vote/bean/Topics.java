@@ -24,17 +24,56 @@ public class Topics implements Serializable{
 	private String edate;
 	private String usids;
 	private Integer status = 0;  // 1、未开始   2、已结束    3、已投票
-	private Integer count = 0;
-	
+	private Integer count = 0; // 有多少人参与投票了
+	private Integer num = 0; // 有多少个选项
+
 	private String uname; // 用户名
 	private List<TopicItem> topicItems;
-	
+
 	@Override
 	public String toString() {
 		return "Topics [tid=" + tid + ", tname=" + tname + ", types=" + types + ", usid=" + usid + ", sdate=" + sdate
 				+ ", edate=" + edate + ", usids=" + usids + ", uname=" + uname + "]";
 	}
-	
+
+	// 判断开始日期
+	public void setSdateStatus() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			Date source = sdf.parse(sdate); // 将日期字符串转成日期对象
+			Date curr = new Date();
+
+			if (source.after(curr)) { // 如果开始投票日期在前日期之后，说明还没开始
+				this.status = 1;
+			}
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// 判断开始日期
+	public void setEdateStatus() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			Date source = sdf.parse(edate); // 将日期字符串转成日期对象
+			Date curr = new Date();
+
+			if (source.before(curr)) { // 结束日期在当前日期之前，说明已经结束
+				this.status = 2;
+			}
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public Integer getNum() {
+		return num;
+	}
+
+	public void setNum(Integer num) {
+		this.num = num;
+	}
+
 	public Integer getCount() {
 		return count;
 	}
@@ -89,18 +128,7 @@ public class Topics implements Serializable{
 
 	public void setSdate(String sdate) {
 		this.sdate = sdate;
-		
-		try {
-			// 判断是否已经开始投票了
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-			Date date = sdf.parse(sdate);
-			Date date1 = new Date();
-			if (date.after(date1)) { // 如果开始投票的日期在当前日期之后，说明还没开始
-				this.status = 1;
-			}
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		setSdateStatus();
 	}
 
 	public String getEdate() {
@@ -109,18 +137,7 @@ public class Topics implements Serializable{
 
 	public void setEdate(String edate) {
 		this.edate = edate;
-		
-		try {
-			// 判断是否已经开始投票了
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-			Date date = sdf.parse(edate);
-			Date date1 = new Date();
-			if (date.before(date1)) { // 如果结束投票的日期在当前日期之后，说明还没开始
-				this.status = 2;
-			}
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		setEdateStatus();
 	}
 
 	public String getUsids() {
@@ -129,10 +146,10 @@ public class Topics implements Serializable{
 
 	public void setUsids(String usids) {
 		if (!StringUtil.checkNull(usids)) {
-			usids = usids.substring(1);
+			usids = usids.substring(1); // &1001&1002&2001  截掉最前面的逗号
 		}
 		this.usids = usids;
-		
+
 		if (!StringUtil.checkNull(usids)) {
 			this.count = usids.split("&").length;
 		}

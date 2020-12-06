@@ -43,14 +43,14 @@ window.onload = function(){
 		</div>
 		<div class="login">
 			<h2>用户登录</h2>
-			<form method="post" action="">
+			<form onsubmit="return false">
 				<dl id="loginBox">
 					<dt>用户名：</dt>
-					<dd><input type="text" class="input-text" name="userId"  value=""/></dd>
+					<dd><input type="text" class="input-text" name="userId"  value="" v-model="account"/></dd>
 					<dt>密　码：</dt>
-					<dd><input type="password" class="input-text" name="password"  value=""/></dd>
+					<dd><input type="password" class="input-text" name="password"  value="" v-model="pwd"/></dd>
 					<dt></dt>
-					<dd><input type="submit" class="input-button" name="submit" value="登录" /> <a href="register.html">新用户注册</a></dd>
+					<dd><input type="submit" class="input-button" name="submit" value="登录"  @click="login"/> <a href="register.html">新用户注册</a></dd>
 				</dl>
 			</form>
 			<div class="error"></div>
@@ -62,5 +62,34 @@ window.onload = function(){
 <div id="footer" class="wrap">
 	源辰信息 &copy; 版权所有
 </div>
+<script type="text/javascript" src="js/jquery-1.12.4.js"></script>
+<script type="text/javascript" src="js/vue.js"></script>
+<script type="text/javascript" src="js/axios.js"></script>
+<script type="text/javascript" src="js/qs.js"></script>
+<script type="text/javascript">
+let app = new Vue({
+	el: "#login",
+	data: {
+		account: "navy",
+		pwd: "123321"
+	},
+	methods: {
+		login: function() {
+			if (this.account == "" || this.pwd == "") {
+				return;
+			}
+			
+			axios.post("user/login", qs.stringify({uname: this.account, pwd: this.pwd})).then( rt => {
+				if (rt.status == 200 && rt.data.code == 200) {
+					location.href="back/manage.html";
+					return;
+				}
+				
+				alert("账号或密码错误，请确认后重新登录...");
+			})
+		}
+	}
+})
+</script>
 </body>
 </html>

@@ -4,5 +4,28 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
 <mapper namespace="Topics">
+	<insert id="add" parameterType="Topics">
+		insert into topics values(#{tid}, #{tname}, #{types}, #{usid}, #{sdate}, #{edate}, '');
+	</insert>
 	
+	<select id="findAll" resultType="Topics">
+		select tid, tname, usids, date_format(sdate, '%Y-%m-%d') sdate, date_format(edate, '%Y-%m-%d') edate,
+		(select count(ino) from topicitem i where i.tid=t.tid) num from topics t;
+	</select>
+	
+	<select id="findByTid" parameterType="string" resultMap="topicsInfo">
+		select t.tid, tname, usids, types, iname, ino, nums from topicitem i, topics t where i.tid=t.tid and t.tid=#{_parameter}
+	</select>
+	
+	<resultMap type="Topics" id="topicsInfo" autoMapping="true">
+		<id column="tid" property="tid"/>
+		
+		<collection property="topicItems" ofType="TopicItem" autoMapping="true">
+			<id property="ino" column="ino"/>
+		</collection>
+	</resultMap>
+	
+	<update id="update" parameterType="map">
+		update topics set usids=concat(usids, '&amp;', #{usid}) where tid=#{tid}
+	</update>
 </mapper>

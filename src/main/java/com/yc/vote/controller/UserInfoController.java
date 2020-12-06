@@ -44,4 +44,19 @@ public class UserInfoController extends BasicController{
 		}
 		this.send(response, 500, "失败");
 	}
+	
+	/**
+	 * 检查登录
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
+	public void checkLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		Object obj = request.getSession().getAttribute("currentLoginUser");
+		if (obj == null) {
+			this.send(response, 500, "失败");
+			return;
+		}
+		this.send(response, 200, obj);
+	}
 }

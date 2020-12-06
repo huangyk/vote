@@ -4,5 +4,17 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
 <mapper namespace="TopicItem">
+	<insert id="add" parameterType="list">
+		insert into topicitem values
+		<foreach collection="list" separator="," item="item">
+		(0, #{item.tid}, #{item.iname}, 0)
+		</foreach>
+	</insert>
 	
+	<update id="update">
+		update topicitem set nums = nums + 1
+		<foreach collection="array" open=" where ino in(" separator="," close=")" item="item">
+			#{item}
+		</foreach>
+	</update>
 </mapper>
